@@ -4,19 +4,19 @@
 #
 # Copyright (c) 2015 The Authors, All Rights Reserved.
 
-package 'httpd' do
+package node['testcookbook']['package_name'] do
   action :install
 end
 
-template '/etc/httpd/httpd.conf' do
+template node['testcookbook']['config_filename'] do
   source 'httpd.conf.erb'
   owner 'root'
   group 'root'
   mode '0644'
-  notifies :restart, 'service[httpd]'
+  notifies :restart, "service[#{node['testcookbook']['service_name']}]"
 end
 
-service 'httpd' do
+service node['testcookbook']['service_name'] do
   supports :status => true, :restart => true, :reload => true
   action [:start, :enable]
 end
