@@ -27,9 +27,12 @@ describe 'testcookbook::default' do
   # Chefspec examples can be found at
   # https://github.com/sethvargo/chefspec/tree/master/examples
 
+  # For this test we are not specifying an operating system or any changes to
+  # the default attributes
   context 'When all attributes are default, on an unspecified platform, the recipe:' do
-
-    # Not specifying an operating system or any changes to default attributes
+    
+    # It would be really boring to keep typing
+    # ChefSpec::ServerRunner.new.converge(described_recipe)
     let(:chef_run) do
       runner = ChefSpec::ServerRunner.new
       runner.converge(described_recipe)
