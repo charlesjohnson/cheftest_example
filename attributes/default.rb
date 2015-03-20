@@ -19,7 +19,16 @@
 # limitations under the License.
 #
 
-# default attributes for all platforms
-default['testcookbook']['package_name'] = 'httpd'
-default['testcookbook']['config_filename'] = '/etc/httpd/httpd.conf'
-default['testcookbook']['service_name'] = 'httpd'
+# default attributes change depending on platform
+case node['platform_family']
+when 'debian'
+  default['testcookbook']['package_name'] = 'apache2'
+  default['testcookbook']['service_name'] = 'apache2'
+  default['testcookbook']['web_root'] = '/var/www'
+else
+  default['testcookbook']['package_name'] = 'httpd'
+  default['testcookbook']['service_name'] = 'httpd'
+  default['testcookbook']['web_root'] = '/var/www/html'
+end
+
+default['testcookbook']['feature_flag'] = false

@@ -1,3 +1,5 @@
+
+
 # This Chefspec test was created by Chef generate
 #
 # Cookbook Name:: testcookbook
@@ -20,17 +22,99 @@
 # limitations under the License.
 #
 
+# Chefspec examples can be found at
+# https://github.com/sethvargo/chefspec/tree/master/examples
+
 require 'spec_helper'
 
+# This section describes tests for the "testcookbook::default recipe
 describe 'testcookbook::default' do
+  #
+  # It would be really boring to keep typing chef_run.node['testcookbook']
+  let(:testcookbook) { chef_run.node['testcookbook'] }
+  #
+  # It would be really boring to keep typing
+  # chef_run.cookbook_file("#{testcookbook['web_root']}/index.html")
+  let(:indexfile) { chef_run.cookbook_file("#{testcookbook['web_root']}/index.html") }
 
-  # Chefspec examples can be found at
-  # https://github.com/sethvargo/chefspec/tree/master/examples
+  #
+  # This cookbook supports multiple linux operating systems. If there are tests
+  # that must be run differently in different contexts, like resources that
+  # might have different names on different linux systems, we can build up
+  # shared example sets to use so that we don't repeat ourselves.
+  #
+  # For an explanation of each example set, see the table in the comments below.
+  shared_examples_for :default_recipe do
+    #
+    # These test names were chosen deliberately. Note that I didn't say "It
+    # installs the package," because that's not what Chefspec tests. Chefspec
+    # only tests that a package resource is added to the Chef run's resource
+    # collection. To test that the package has actually been installed, use
+    # Serverspec.
+    #
+    # To learn more about how Chef builds the resource collection, see
+    # https://www.youtube.com/watch?v=ZGDdhgoFAec
+    it 'adds a properly configured package resource to the collection, and'\
+    'that resource is named by the [\'testcookbook\'][\'package_name\'] attribute' do
+      expect(chef_run).to install_package(testcookbook['package_name'])
+    end
 
-  # For this test we are not specifying an operating system or any changes to
-  # the default attributes
+    it 'adds a properly configured service resource to the collection, and'\
+    'that resource is named for the [\'testcookbook\'][\'service_name\'] attribute' do
+      expect(chef_run).to start_service(testcookbook['service_name'])
+      expect(chef_run).to enable_service(testcookbook['service_name'])
+    end
+  end
+
+  shared_examples_for :feature_disabled do
+    #
+    # Again, we're not testing that the recipe won't write out a new index.html
+    # file. We're only testing that a resource is not added to the Chef run's
+    # resource collection.
+    it 'does not add a cookbook_file \'index.html\' resource with action '\
+    ':create to the collection' do
+      expect(chef_run).not_to create_cookbook_file("#{testcookbook['web_root']}/index.html")
+    end
+  end
+
+  shared_examples_for :feature_enabled do
+    #
+    # Once again, only testing that the cookbook_file resource is added to the
+    # resource collection with the proper action.
+    it 'adds a properly configured cookbook_file resource to the collection,'\
+    'and that resource is named for the [\'testcookbook\'][\'web_root\']'\
+    'attribute' do
+      expect(chef_run).to create_cookbook_file("#{testcookbook['web_root']}/index.html")
+      expect(indexfile.owner).to eq('root')
+      expect(indexfile.group).to eq('root')
+      expect(indexfile.mode).to eq('0644')
+
+    end
+  end
+
+  # This recipe supports platform-specific attribute changes for debian-family
+  # Linux, and also has a feature flag that wraps a specific resource.
+  # This gives us 4 scenarios to test in Chefspec:
+  #
+  #    Feature flag on     Feature flag off
+  #  +------------------+------------------+
+  #  | No OS Specified  |  No OS Specified |
+  #  +------------------+------------------+
+  #  | Debian family OS | Debian family OS |
+  #  +------------------+------------------+
+  #
+  # To test each of the four scenarios, we create a context. Our four contexts
+  # will be:
+  #  - default attributes, No OS specified (feature_flag defaults to false)
+  #  - default attributes, Debian-family OS specified (feature_flag defaults to false)
+  #  - feature_flag attribute is set to true, No OS specified
+  #  - feature_flag attribute is set to true, Debian-family OS specified
+  #
+  # Each context will contain a separate Chef-client run.
+  #
+
   context 'When all attributes are default, on an unspecified platform, the recipe:' do
-    
+    #
     # It would be really boring to keep typing
     # ChefSpec::ServerRunner.new.converge(described_recipe)
     let(:chef_run) do
@@ -38,47 +122,76 @@ describe 'testcookbook::default' do
       runner.converge(described_recipe)
     end
 
-    # It would be really boring to keep typing chef_run.node['testcookbook']
-    let(:testcookbook) { chef_run.node['testcookbook'] }
-
-    # Catch any regressions that might be caused in the future by changes to
-    # the default attributes
+    # We hardcode the attribute names in the test to catch any regressions that
+    # might be caused in the future by changes to the default attributes
+    # file
     it 'sets the default attributes correctly' do
       expect(testcookbook['package_name']).to eq('httpd')
-      expect(testcookbook['config_filename']).to eq '/etc/httpd/httpd.conf'
       expect(testcookbook['service_name']).to eq('httpd')
+      expect(testcookbook['web_root']).to eq('/var/www/html')
     end
 
-    # The resource names are hardcoded below because we aren't testing whether
-    # Chef picks up the attribute name and puts it in the resource as part of
-    # our recipe. We already know Chef will do that. It's not worth testing.
+    # Invoke the shared example sets defined above
+    it_behaves_like :default_recipe
+    it_behaves_like :feature_disabled
+  end
+
+  context 'When all attributes are default, on a Debian-family platform, the recipe:' do
     #
-    # Rather, what we want to test is that this recipe will create a resource
-    # of type package, with the name 'httpd' in the Chef run's resource
-    # collection. This is the actual necessary step to install the httpd
-    # package on the operating system. We want to ensure that whoever changes
-    # this recipe in the future, those resources will still be created when
-    # this recipe is run.
-
-    it 'has a package resource to install the httpd package' do
-      expect(chef_run).to install_package('httpd')
-    end
-
     # It would be really boring to keep typing
-    # chef_run.template('/etc/httpd/httpd.conf')
-    let(:conffile)  { chef_run.template('/etc/httpd/httpd.conf') }
-    it 'has a template resource that writes the /etc/httpd/httpd.conf config file' do
-      expect(chef_run).to create_template('/etc/httpd/httpd.conf')
-      expect(conffile.owner).to eq('root')
-      expect(conffile.group).to eq('root')
-      expect(conffile.mode).to eq('0644')
-      expect(conffile).to notify('service[httpd]').to(:restart)
+    # ChefSpec::ServerRunner.new.converge(described_recipe)
+    let(:chef_run) do
+      runner = ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '14.04')
+      runner.converge(described_recipe)
     end
 
-    it 'has a service resource to start and enable the httpd service' do
-      expect(chef_run).to start_service('httpd')
-      expect(chef_run).to enable_service('httpd')
+    # We hardcode the attribute names in the test to catch any regressions that
+    # might be caused in the future by changes to the default attributes
+    # file
+    it 'sets the default attributes correctly' do
+      expect(testcookbook['package_name']).to eq('apache2')
+      expect(testcookbook['service_name']).to eq('apache2')
+      expect(testcookbook['web_root']).to eq('/var/www')
     end
 
+    # Invoke the shared example sets defined above
+    it_behaves_like :default_recipe
+    it_behaves_like :feature_disabled
+  end
+
+  context 'When the feature_flag attribute is true, on an unspecified platform, the recipe:' do
+    #
+    # It would be really boring to keep typing
+    # ChefSpec::ServerRunner.new.converge(described_recipe)
+    let(:chef_run) do
+      runner = ChefSpec::ServerRunner.new
+      runner.node.set['testcookbook']['feature_flag'] = true
+      runner.converge(described_recipe)
+    end
+
+    # Note that the default attribute regression test was dropped, as we're no
+    # longer testing the default attribute set.
+
+    # Invoke the shared example set defined above
+    it_behaves_like :default_recipe
+    it_behaves_like :feature_enabled
+  end
+
+  context 'When the feature_flag attribute is true, on a Debian-family platform, the recipe:' do
+    #
+    # It would be really boring to keep typing
+    # ChefSpec::ServerRunner.new.converge(described_recipe)
+    let(:chef_run) do
+      runner = ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '14.04')
+      runner.node.set['testcookbook']['feature_flag'] = true
+      runner.converge(described_recipe)
+    end
+
+    # Note that the default attribute regression test was dropped, as we're no
+    # longer testing the default attribute set.
+
+    # Invoke the shared example set defined above
+    it_behaves_like :default_recipe
+    it_behaves_like :feature_enabled
   end
 end

@@ -23,15 +23,15 @@ package node['testcookbook']['package_name'] do
   action :install
 end
 
-template node['testcookbook']['config_filename'] do
-  source 'httpd.conf.erb'
-  owner 'root'
-  group 'root'
-  mode '0644'
-  notifies :restart, "service[#{node['testcookbook']['service_name']}]"
-end
-
 service node['testcookbook']['service_name'] do
   supports :status => true, :restart => true, :reload => true
   action [:start, :enable]
+end
+
+cookbook_file "#{node['testcookbook']['web_root']}/index.html" do
+  source 'index.html'
+  owner 'root'
+  group 'root'
+  mode '0644'
+  only_if { node['testcookbook']['feature_flag'] == true }
 end
