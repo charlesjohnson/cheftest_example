@@ -30,11 +30,11 @@ require 'spec_helper'
 # This section describes tests for the "testcookbook::default recipe
 describe 'testcookbook::default' do
   #
-  # It would be really boring to keep typing chef_run.node['testcookbook']
+  # It would be really boring to keep typing some things over and over again.
+  # Rspec let() gives us the ability to use a shorthand. We use this instead
+  # of a local variable assignment because the value of a let() will be cached
+  # across multiple calls in the same example, but not across examples.
   let(:testcookbook) { chef_run.node['testcookbook'] }
-  #
-  # It would be really boring to keep typing
-  # chef_run.cookbook_file("#{testcookbook['web_root']}/index.html")
   let(:indexfile) { chef_run.cookbook_file("#{testcookbook['web_root']}/index.html") }
 
   #
@@ -74,6 +74,7 @@ describe 'testcookbook::default' do
     it 'does not add a cookbook_file \'index.html\' resource with action '\
     ':create to the collection' do
       expect(chef_run).not_to create_cookbook_file("#{testcookbook['web_root']}/index.html")
+      expect(chef_run).not_to render_file("#{testcookbook['web_root']}/index.html").with_content('Hello world')
     end
   end
 
@@ -85,10 +86,10 @@ describe 'testcookbook::default' do
     'and that resource is named for the [\'testcookbook\'][\'web_root\']'\
     'attribute' do
       expect(chef_run).to create_cookbook_file("#{testcookbook['web_root']}/index.html")
+      expect(chef_run).to render_file("#{testcookbook['web_root']}/index.html").with_content('Hello world')
       expect(indexfile.owner).to eq('root')
       expect(indexfile.group).to eq('root')
       expect(indexfile.mode).to eq('0644')
-
     end
   end
 
@@ -115,7 +116,7 @@ describe 'testcookbook::default' do
 
   context 'When all attributes are default, on an unspecified platform, the recipe:' do
     #
-    # It would be really boring to keep typing
+    # Again, it would be really boring to keep typing
     # ChefSpec::ServerRunner.new.converge(described_recipe)
     let(:chef_run) do
       runner = ChefSpec::ServerRunner.new
@@ -138,7 +139,7 @@ describe 'testcookbook::default' do
 
   context 'When all attributes are default, on a Debian-family platform, the recipe:' do
     #
-    # It would be really boring to keep typing
+    # Again, it would be really boring to keep typing
     # ChefSpec::ServerRunner.new.converge(described_recipe)
     let(:chef_run) do
       runner = ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '14.04')
@@ -161,7 +162,7 @@ describe 'testcookbook::default' do
 
   context 'When the feature_flag attribute is true, on an unspecified platform, the recipe:' do
     #
-    # It would be really boring to keep typing
+    # Again, it would be really boring to keep typing
     # ChefSpec::ServerRunner.new.converge(described_recipe)
     let(:chef_run) do
       runner = ChefSpec::ServerRunner.new
@@ -179,7 +180,7 @@ describe 'testcookbook::default' do
 
   context 'When the feature_flag attribute is true, on a Debian-family platform, the recipe:' do
     #
-    # It would be really boring to keep typing
+    # Again, it would be really boring to keep typing
     # ChefSpec::ServerRunner.new.converge(described_recipe)
     let(:chef_run) do
       runner = ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '14.04')
