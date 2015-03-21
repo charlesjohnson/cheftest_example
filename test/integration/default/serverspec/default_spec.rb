@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'testcookbook::default' do
+describe 'cheftest::default' do
   #
   # Serverspec examples can be found at
   # http://serverspec.org/resource_types.html

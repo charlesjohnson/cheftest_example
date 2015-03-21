@@ -1,4 +1,4 @@
-name             'testcookbook'
+name             'cheftest'
 maintainer       'Charles Johnson'
 maintainer_email 'charles@chef.io'
 license          'Apache 2.0'

@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: testcookbook
+# Cookbook Name:: cheftest
 # Attributes:: default
 #
 # Author:: Charles Johnson (<charles@chef.io>)
@@ -22,13 +22,13 @@
 # default attributes change depending on platform
 case node['platform_family']
 when 'debian'
-  default['testcookbook']['package_name'] = 'apache2'
-  default['testcookbook']['service_name'] = 'apache2'
-  default['testcookbook']['web_root'] = '/var/www'
+  default['cheftest']['package_name'] = 'apache2'
+  default['cheftest']['service_name'] = 'apache2'
+  default['cheftest']['web_root'] = '/var/www'
 else
-  default['testcookbook']['package_name'] = 'httpd'
-  default['testcookbook']['service_name'] = 'httpd'
-  default['testcookbook']['web_root'] = '/var/www/html'
+  default['cheftest']['package_name'] = 'httpd'
+  default['cheftest']['service_name'] = 'httpd'
+  default['cheftest']['web_root'] = '/var/www/html'
 end
 
-default['testcookbook']['feature_flag'] = false
+default['cheftest']['feature_flag'] = false

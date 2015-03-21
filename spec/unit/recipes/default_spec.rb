@@ -2,7 +2,7 @@
 
 # This Chefspec test was created by Chef generate
 #
-# Cookbook Name:: testcookbook
+# Cookbook Name:: cheftest
 # Spec:: default
 #
 # Author:: Charles Johnson (<charles@chef.io>)
@@ -27,15 +27,15 @@
 
 require 'spec_helper'
 
-# This section describes tests for the "testcookbook::default recipe
-describe 'testcookbook::default' do
+# This section describes tests for the "cheftest::default recipe
+describe 'cheftest::default' do
   #
   # It would be really boring to keep typing some things over and over again.
   # Rspec let() gives us the ability to use a shorthand. We use this instead
   # of a local variable assignment because the value of a let() will be cached
   # across multiple calls in the same example, but not across examples.
-  let(:testcookbook) { chef_run.node['testcookbook'] }
-  let(:indexfile) { chef_run.cookbook_file("#{testcookbook['web_root']}/index.html") }
+  let(:cheftest) { chef_run.node['cheftest'] }
+  let(:indexfile) { chef_run.cookbook_file("#{cheftest['web_root']}/index.html") }
 
   #
   # This cookbook supports multiple linux operating systems. If there are tests
@@ -55,14 +55,14 @@ describe 'testcookbook::default' do
     # To learn more about how Chef builds the resource collection, see
     # https://www.youtube.com/watch?v=ZGDdhgoFAec
     it 'adds a properly configured package resource to the collection, and'\
-    'that resource is named by the [\'testcookbook\'][\'package_name\'] attribute' do
-      expect(chef_run).to install_package(testcookbook['package_name'])
+    'that resource is named by the [\'cheftest\'][\'package_name\'] attribute' do
+      expect(chef_run).to install_package(cheftest['package_name'])
     end
 
     it 'adds a properly configured service resource to the collection, and'\
-    'that resource is named for the [\'testcookbook\'][\'service_name\'] attribute' do
-      expect(chef_run).to start_service(testcookbook['service_name'])
-      expect(chef_run).to enable_service(testcookbook['service_name'])
+    'that resource is named for the [\'cheftest\'][\'service_name\'] attribute' do
+      expect(chef_run).to start_service(cheftest['service_name'])
+      expect(chef_run).to enable_service(cheftest['service_name'])
     end
   end
 
@@ -73,8 +73,8 @@ describe 'testcookbook::default' do
     # resource collection.
     it 'does not add a cookbook_file \'index.html\' resource with action '\
     ':create to the collection' do
-      expect(chef_run).not_to create_cookbook_file("#{testcookbook['web_root']}/index.html")
-      expect(chef_run).not_to render_file("#{testcookbook['web_root']}/index.html").with_content('Hello world')
+      expect(chef_run).not_to create_cookbook_file("#{cheftest['web_root']}/index.html")
+      expect(chef_run).not_to render_file("#{cheftest['web_root']}/index.html").with_content('Hello world')
     end
   end
 
@@ -83,10 +83,10 @@ describe 'testcookbook::default' do
     # Once again, only testing that the cookbook_file resource is added to the
     # resource collection with the proper action.
     it 'adds a properly configured cookbook_file resource to the collection,'\
-    'and that resource is named for the [\'testcookbook\'][\'web_root\']'\
+    'and that resource is named for the [\'cheftest\'][\'web_root\']'\
     'attribute' do
-      expect(chef_run).to create_cookbook_file("#{testcookbook['web_root']}/index.html")
-      expect(chef_run).to render_file("#{testcookbook['web_root']}/index.html").with_content('Hello world')
+      expect(chef_run).to create_cookbook_file("#{cheftest['web_root']}/index.html")
+      expect(chef_run).to render_file("#{cheftest['web_root']}/index.html").with_content('Hello world')
       expect(indexfile.owner).to eq('root')
       expect(indexfile.group).to eq('root')
       expect(indexfile.mode).to eq('0644')
@@ -127,9 +127,9 @@ describe 'testcookbook::default' do
     # might be caused in the future by changes to the default attributes
     # file
     it 'sets the default attributes correctly' do
-      expect(testcookbook['package_name']).to eq('httpd')
-      expect(testcookbook['service_name']).to eq('httpd')
-      expect(testcookbook['web_root']).to eq('/var/www/html')
+      expect(cheftest['package_name']).to eq('httpd')
+      expect(cheftest['service_name']).to eq('httpd')
+      expect(cheftest['web_root']).to eq('/var/www/html')
     end
 
     # Invoke the shared example sets defined above
@@ -150,9 +150,9 @@ describe 'testcookbook::default' do
     # might be caused in the future by changes to the default attributes
     # file
     it 'sets the default attributes correctly' do
-      expect(testcookbook['package_name']).to eq('apache2')
-      expect(testcookbook['service_name']).to eq('apache2')
-      expect(testcookbook['web_root']).to eq('/var/www')
+      expect(cheftest['package_name']).to eq('apache2')
+      expect(cheftest['service_name']).to eq('apache2')
+      expect(cheftest['web_root']).to eq('/var/www')
     end
 
     # Invoke the shared example sets defined above
@@ -166,7 +166,7 @@ describe 'testcookbook::default' do
     # ChefSpec::ServerRunner.new.converge(described_recipe)
     let(:chef_run) do
       runner = ChefSpec::ServerRunner.new
-      runner.node.set['testcookbook']['feature_flag'] = true
+      runner.node.set['cheftest']['feature_flag'] = true
       runner.converge(described_recipe)
     end
 
@@ -184,7 +184,7 @@ describe 'testcookbook::default' do
     # ChefSpec::ServerRunner.new.converge(described_recipe)
     let(:chef_run) do
       runner = ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '14.04')
-      runner.node.set['testcookbook']['feature_flag'] = true
+      runner.node.set['cheftest']['feature_flag'] = true
       runner.converge(described_recipe)
     end
 

@@ -1,4 +1,4 @@
-testcookbook
+cheftest
 ============
 This is an educational cookbook, designed to show new users how to build effective tests using Chefspec, Test Kitchen, and Serverspec. It contains a very simple recipe and complete test coverage.
 

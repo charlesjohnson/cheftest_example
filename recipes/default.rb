@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: testcookbook
+# Cookbook Name:: cheftest
 # Recipe:: default
 #
 # Author:: Charles Johnson (<charles@chef.io>)
@@ -19,19 +19,19 @@
 # limitations under the License.
 #
 
-package node['testcookbook']['package_name'] do
+package node['cheftest']['package_name'] do
   action :install
 end
 
-service node['testcookbook']['service_name'] do
+service node['cheftest']['service_name'] do
   supports :status => true, :restart => true, :reload => true
   action [:start, :enable]
 end
 
-cookbook_file "#{node['testcookbook']['web_root']}/index.html" do
+cookbook_file "#{node['cheftest']['web_root']}/index.html" do
   source 'index.html'
   owner 'root'
   group 'root'
   mode '0644'
-  only_if { node['testcookbook']['feature_flag'] == true }
+  only_if { node['cheftest']['feature_flag'] == true }
 end
